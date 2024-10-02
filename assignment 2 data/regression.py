@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
@@ -68,6 +68,25 @@ def train_and_evaluate(X_train, y_train, X_val, y_val):
 # Evaluate models
 results = train_and_evaluate(X_train, y_train, X_val, y_val)
 print("Model evaluation results:", results)
+
+# Cross-validation
+def cross_validate_model(model, X, y, cv=5):
+    scores = cross_val_score(model, X, y, scoring='neg_mean_squared_error', cv=cv)
+    rmse_scores = np.sqrt(-scores)
+    return rmse_scores
+
+# Cross-validate models
+cv_results = {}
+models = {
+    'Linear Regression': LinearRegression(),
+    'Random Forest': RandomForestRegressor(random_state=42)
+}
+for name, model in models.items():
+    cv_results[name] = cross_validate_model(model, X, y)
+
+print("Cross-validation results:")
+for name, scores in cv_results.items():
+    print(f"{name}: Mean RMSE = {scores.mean()}, Std RMSE = {scores.std()}")
 
 # Train final model
 final_model = RandomForestRegressor(random_state=42)
